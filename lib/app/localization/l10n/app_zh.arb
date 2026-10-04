@@ -1,0 +1,58 @@
+{
+  "@@locale": "zh",
+  "appTitle": "__APP_DISPLAY_NAME__",
+  "loginTitle": "欢迎使用",
+  "loginDescription": "登录后即可体验这套可复用的应用模板。",
+  "authUiRequired": "请将此页面替换为项目对应的身份认证登录流程。",
+  "demoSignIn": "使用演示账号继续",
+  "signingIn": "正在登录…",
+  "articlesTitle": "发现",
+  "articleDetails": "内容详情",
+  "settingsTitle": "设置",
+  "componentsTitle": "组件展示",
+  "appearance": "外观",
+  "language": "语言",
+  "systemTheme": "跟随系统",
+  "lightTheme": "浅色",
+  "darkTheme": "深色",
+  "english": "English",
+  "chinese": "简体中文",
+  "signOut": "退出登录",
+  "signOutTitle": "退出登录？",
+  "signOutMessage": "你可以随时重新登录。",
+  "cancel": "取消",
+  "confirm": "确定",
+  "retry": "重试",
+  "loading": "正在加载",
+  "emptyTitle": "这里还没有内容",
+  "emptyMessage": "新内容将在这里显示。",
+  "errorTitle": "发生了一点问题",
+  "offlineError": "请检查网络连接后重试。",
+  "configurationError": "使用此环境前，请先配置对应的数据服务。",
+  "detailMissing": "这条内容已不可用。",
+  "loadMore": "加载更多",
+  "demoBadge": "演示",
+  "retrying": "正在重试…",
+  "requestFailed": "暂时无法完成请求。",
+  "showComponents": "查看通用组件",
+  "formComponents": "按钮与表单",
+  "asyncComponents": "异步状态",
+  "actionComponents": "弹窗与操作菜单",
+  "paginationComponents": "分页列表",
+  "emailPlaceholder": "电子邮箱",
+  "exampleItem": "示例条目 {number}",
+  "@exampleItem": {
+    "placeholders": {
+      "number": { "type": "int" }
+    }
+  },
+  "goBack": "返回",
+  "errorDetails": "错误详情",
+  "refresh": "刷新",
+  "pageNumber": "第 {page} 页",
+  "@pageNumber": {
+    "placeholders": {
+      "page": { "type": "int" }
+    }
+  }
+}

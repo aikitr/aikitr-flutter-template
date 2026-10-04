@@ -1,0 +1,28 @@
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.fvm/flutter_sdk
+build/
+coverage/
+
+# Local configuration and signing
+config/*.local.json
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+ios/Flutter/ephemeral/
+ios/Runner.xcworkspace/xcuserdata/
+ios/Runner.xcodeproj/xcuserdata/
+ios/Runner.xcodeproj/project.xcworkspace/xcuserdata/
+ios/Pods/
+ios/*.xcworkspace/xcuserdata/
+ios/Runner/*.entitlements.local
+*.mobileprovision
+*.p12
+
+# Editors and operating system
+.idea/
+.vscode/
+.DS_Store
