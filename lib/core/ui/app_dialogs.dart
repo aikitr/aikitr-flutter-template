@@ -11,12 +11,10 @@ Future<bool> showAppConfirmationDialog(
   final AppLocalizations l10n = AppLocalizations.of(context);
   final bool? confirmed = await showCupertinoDialog<bool>(
     context: context,
+    barrierDismissible: false,
     builder: (BuildContext dialogContext) => CupertinoAlertDialog(
       title: Text(title),
-      content: Padding(
-        padding: const EdgeInsets.only(top: 8),
-        child: Text(message),
-      ),
+      content: Text(message),
       actions: <Widget>[
         CupertinoDialogAction(
           onPressed: () => Navigator.of(dialogContext).pop(false),
@@ -33,13 +31,17 @@ Future<bool> showAppConfirmationDialog(
   return confirmed ?? false;
 }
 
-Future<void> showAppActionSheet(
+Future<T?> showAppActionSheet<T>(
   BuildContext context, {
   required String title,
   required List<Widget> actions,
 }) async {
-  await showCupertinoModalPopup<void>(
-    context: context,
+  final CupertinoModalPopupRoute<T> route = CupertinoModalPopupRoute<T>(
+    barrierLabel: CupertinoLocalizations.of(context).modalBarrierDismissLabel,
+    barrierColor: CupertinoDynamicColor.resolve(
+      kCupertinoModalBarrierColor,
+      context,
+    ),
     builder: (BuildContext sheetContext) => CupertinoActionSheet(
       title: Text(title),
       actions: actions,
@@ -49,4 +51,8 @@ Future<void> showAppActionSheet(
       ),
     ),
   );
+  final NavigatorState navigator = Navigator.of(context, rootNavigator: true);
+  final T? result = await navigator.push(route);
+  await route.completed;
+  return result;
 }

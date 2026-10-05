@@ -1,0 +1,24 @@
+# Planning form. null targets must be agreed before using this as a release gate.
+schema_version: 1
+owner: performance_owner
+build_mode: profile
+device: representative_device_and_os
+dataset: versioned_fixture
+network: controlled_profile
+sampling:
+  runs: null
+  percentile: p95
+metrics:
+  cold_start_interactive_ms:
+    target: null
+    baseline: null
+    regression_tolerance_percent: null
+  slow_frame_ratio:
+    target: null
+    refresh_rate_hz: null
+  steady_memory_mb:
+    target: null
+  installed_size_mb:
+    target: null
+recheck_policy: same conditions; repeat noisy failures and preserve evidence
+exception: owner, rationale, expiration and mitigation if a regression is accepted

@@ -7,7 +7,8 @@ void main() {
     for (final String mode in <String>['Debug', 'Release']) {
       final String config = File('ios/Flutter/$mode.xcconfig')
           .readAsStringSync();
-      expect(config, contains('FLUTTER_TARGET = lib/main_dev.dart'));
+      expect(config, contains('#include "Generated.xcconfig"'));
+      expect(config, isNot(contains('FLUTTER_TARGET =')));
       expect(
         config,
         contains(r'APP_EFFECTIVE_BUNDLE_ID = $(APP_BASE_BUNDLE_ID).dev'),
@@ -21,11 +22,16 @@ void main() {
 
   group('iOS flavor configuration', () {
     for (final String flavor in <String>['dev', 'staging', 'prod']) {
-      test('$flavor scheme targets its own entry point and configurations', () {
+      test('$flavor scheme preserves Flutter target and configurations', () {
         final String scheme = File(
           'ios/Runner.xcodeproj/xcshareddata/xcschemes/$flavor.xcscheme',
         ).readAsStringSync();
         final String target = 'lib/main_$flavor.dart';
+        expect(File(target).existsSync(), isTrue, reason: target);
+        expect(
+          File('README.md').readAsStringSync(),
+          contains('--target $target'),
+        );
 
         expect(_actionConfiguration(scheme, 'TestAction'), 'Debug-$flavor');
         expect(_actionConfiguration(scheme, 'LaunchAction'), 'Debug-$flavor');
@@ -43,7 +49,7 @@ void main() {
           expect(config.existsSync(), isTrue, reason: config.path);
           expect(
             config.readAsStringSync(),
-            contains('FLUTTER_TARGET = $target'),
+            isNot(contains('FLUTTER_TARGET =')),
           );
         }
 

@@ -55,15 +55,8 @@ final class SessionController extends AsyncNotifier<Session?> {
   }
 
   Future<void> signOut() async {
-    final Session? previous = state.value;
-    state = const AsyncLoading();
-    try {
-      await _repository.signOut();
-      state = const AsyncData(null);
-    } on Object catch (error, stackTrace) {
-      state = AsyncData(previous);
-      Error.throwWithStackTrace(error, stackTrace);
-    }
+    await _repository.signOut();
+    state = const AsyncData(null);
   }
 }
 

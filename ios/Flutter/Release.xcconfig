@@ -1,5 +1,4 @@
 #include "Generated.xcconfig"
 #include "AppConfig.xcconfig"
-FLUTTER_TARGET = lib/main_dev.dart
 APP_EFFECTIVE_BUNDLE_ID = $(APP_BASE_BUNDLE_ID).dev
 APP_DISPLAY_NAME = $(APP_BASE_DISPLAY_NAME) (Dev)

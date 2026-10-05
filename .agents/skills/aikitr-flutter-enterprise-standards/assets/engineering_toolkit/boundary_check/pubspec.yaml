@@ -1,0 +1,13 @@
+name: flutter_architecture_checks
+description: Configurable AST-based boundaries for a single Flutter application.
+publish_to: none
+version: 1.0.0
+environment:
+  sdk: '>=3.11.0 <4.0.0'
+dependencies:
+  analyzer: ^14.4.0
+  glob: ^2.1.3
+  path: ^1.9.1
+  yaml: ^3.1.3
+dev_dependencies:
+  test: ^1.29.0

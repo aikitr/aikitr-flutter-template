@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -94,53 +92,58 @@ final class SettingsPage extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     AppThemeMode selected,
-  ) => showAppActionSheet(
-    context,
-    title: AppLocalizations.of(context).appearance,
-    actions: AppThemeMode.values
-        .map(
-          (AppThemeMode mode) => CupertinoActionSheetAction(
-            isDefaultAction: mode == selected,
-            onPressed: () => unawaited(
-              _saveSetting(
-                context,
-                AppLocalizations.of(context),
-                () => ref
-                    .read(settingsControllerProvider.notifier)
-                    .setThemeMode(mode),
-              ),
+  ) async {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    final AppThemeMode? mode = await showAppActionSheet<AppThemeMode>(
+      context,
+      title: l10n.appearance,
+      actions: AppThemeMode.values
+          .map(
+            (AppThemeMode mode) => CupertinoActionSheetAction(
+              isDefaultAction: mode == selected,
+              onPressed: () =>
+                  Navigator.of(context, rootNavigator: true).pop(mode),
+              child: Text(_themeLabel(l10n, mode)),
             ),
-            child: Text(_themeLabel(AppLocalizations.of(context), mode)),
-          ),
-        )
-        .toList(growable: false),
-  );
+          )
+          .toList(growable: false),
+    );
+    if (mode == null || !context.mounted) return;
+    await _saveSetting(
+      context,
+      l10n,
+      () => ref.read(settingsControllerProvider.notifier).setThemeMode(mode),
+    );
+  }
 
   Future<void> _chooseLocale(
     BuildContext context,
     WidgetRef ref,
     AppLocalePreference selected,
-  ) => showAppActionSheet(
-    context,
-    title: AppLocalizations.of(context).language,
-    actions: AppLocalePreference.values
-        .map(
-          (AppLocalePreference locale) => CupertinoActionSheetAction(
-            isDefaultAction: locale == selected,
-            onPressed: () => unawaited(
-              _saveSetting(
-                context,
-                AppLocalizations.of(context),
-                () => ref
-                    .read(settingsControllerProvider.notifier)
-                    .setLocale(locale),
-              ),
-            ),
-            child: Text(_localeLabel(AppLocalizations.of(context), locale)),
-          ),
-        )
-        .toList(growable: false),
-  );
+  ) async {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    final AppLocalePreference? locale =
+        await showAppActionSheet<AppLocalePreference>(
+          context,
+          title: l10n.language,
+          actions: AppLocalePreference.values
+              .map(
+                (AppLocalePreference locale) => CupertinoActionSheetAction(
+                  isDefaultAction: locale == selected,
+                  onPressed: () =>
+                      Navigator.of(context, rootNavigator: true).pop(locale),
+                  child: Text(_localeLabel(l10n, locale)),
+                ),
+              )
+              .toList(growable: false),
+        );
+    if (locale == null || !context.mounted) return;
+    await _saveSetting(
+      context,
+      l10n,
+      () => ref.read(settingsControllerProvider.notifier).setLocale(locale),
+    );
+  }
 
   Future<void> _signOut(
     BuildContext context,
@@ -181,7 +184,6 @@ final class SettingsPage extends ConsumerWidget {
   ) async {
     try {
       await save();
-      if (context.mounted) Navigator.of(context).pop();
     } on Object catch (error) {
       if (!context.mounted) return;
       await showCupertinoDialog<void>(

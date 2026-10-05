@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app_template/app/app.dart';
 import 'package:app_template/app/app_config.dart';
 import 'package:app_template/app/localization/generated/app_localizations.dart';
@@ -41,6 +43,34 @@ void main() {
       expect(find.byType(LoginPage), findsOneWidget);
     },
   );
+
+  testWidgets('keeps the authenticated route until sign out completes', (
+    WidgetTester tester,
+  ) async {
+    final _DelayedSignOutRepository repository = _DelayedSignOutRepository();
+    await tester.pumpWidget(_testApp(sessionRepository: repository));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ArticleListPage), findsOneWidget);
+    await tester.tap(find.byIcon(CupertinoIcons.settings).last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey<String>('sign-out')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(CupertinoDialogAction).last);
+    await tester.pumpAndSettle();
+    await repository.signOutStarted.future;
+    await tester.pump();
+
+    final bool settingsRemainedVisible = find
+        .byType(SettingsPage)
+        .evaluate()
+        .isNotEmpty;
+    repository.completeSignOut();
+    await tester.pumpAndSettle();
+
+    expect(settingsRemainedVisible, isTrue);
+    expect(find.byType(LoginPage), findsOneWidget);
+  });
 
   testWidgets(
     'shows setup guidance when a non-demo environment lacks services',
@@ -174,6 +204,29 @@ final class _MemorySessionRepository implements SessionRepository {
 
   @override
   Future<void> signOut() async {}
+}
+
+final class _DelayedSignOutRepository implements SessionRepository {
+  final Completer<void> signOutStarted = Completer<void>();
+  final Completer<void> _signOutCompletion = Completer<void>();
+
+  @override
+  Future<Session?> restoreSession() async => Session(
+    userId: 'user-1',
+    displayName: 'Test User',
+    signedInAt: DateTime.utc(2026),
+  );
+
+  @override
+  Future<Session> signIn() => throw UnimplementedError();
+
+  @override
+  Future<void> signOut() {
+    signOutStarted.complete();
+    return _signOutCompletion.future;
+  }
+
+  void completeSignOut() => _signOutCompletion.complete();
 }
 
 final class _FailingSecureStore implements SecureStore {

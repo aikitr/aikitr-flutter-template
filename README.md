@@ -18,6 +18,10 @@ lib/
 
 页面只处理展示和交互；Controller/AsyncNotifier 管页面状态；Repository 隔离数据来源。先把模型和 Repository 契约放在对应 feature 中。只有当业务规则复杂或被多个模块复用时，再增加 UseCase，避免预先堆空层。
 
+## 企业级工程规范
+
+仓库内置项目级 Flutter/Dart 规范技能，覆盖目录与依赖边界、命名与组件、生命周期恢复、数据迁移、性能、隐私、测试和发布。查看 [技能入口](.agents/skills/aikitr-flutter-enterprise-standards/SKILL.md)，其中也包含可复制的检查工具、CI 示例和团队模板。
+
 ## 环境准备与首次运行
 
 需要 macOS、Xcode（含 iOS Simulator）和能运行 Flutter iOS 工程的稳定 Flutter SDK。可以用 FVM 安装项目固定版本：

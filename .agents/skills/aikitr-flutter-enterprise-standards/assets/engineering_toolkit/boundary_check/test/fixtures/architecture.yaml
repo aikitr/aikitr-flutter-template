@@ -1,0 +1,68 @@
+schema_version: 1
+# First matching group wins. Paths are canonical project-relative paths.
+groups:
+  - id: composition
+    files: ['lib/app/composition/**', 'lib/features/*/*_composition.dart']
+    allow: ['*']
+    packages: ['*']
+    dart: ['*']
+  - id: entry
+    files: ['lib/main*.dart', 'lib/app/**']
+    allow: ['*']
+    packages: ['*']
+    dart: ['*']
+  - id: public
+    files: ['lib/features/*/*.dart']
+    allow: [domain, public, values, errors]
+    packages: [collection, meta, freezed_annotation]
+    dart: [core, async, collection, math]
+  - id: domain
+    files: ['lib/features/*/domain/**']
+    allow: [domain, public, values, errors]
+    packages: [collection, meta, freezed_annotation]
+    dart: [core, async, collection, math]
+  - id: application
+    files: ['lib/features/*/application/**']
+    allow: [application, domain, public, values, errors]
+    packages: [collection, meta]
+    dart: [core, async, collection, math]
+  - id: presentation
+    files: ['lib/features/*/presentation/**']
+    allow: [presentation, application, domain, public, ui, l10n, values, errors]
+    packages: [flutter, flutter_riverpod, riverpod, flutter_bloc, bloc, go_router, intl, collection, meta, freezed_annotation]
+    dart: [core, async, collection, math]
+  - id: data
+    files: ['lib/features/*/data/**']
+    allow: [data, domain, public, values, errors, infrastructure]
+    packages: ['*']
+    dart: ['*']
+  - id: errors
+    files: ['lib/core/errors/**']
+    allow: [errors]
+    packages: [meta]
+    dart: [core, async, collection]
+  - id: values
+    files: ['lib/shared/value_objects/**']
+    allow: [values, errors]
+    packages: [collection, meta, freezed_annotation]
+    dart: [core, async, collection, math]
+  - id: ui
+    files: ['lib/shared/ui/**']
+    allow: [ui, values, errors, l10n]
+    packages: [flutter, intl, collection, meta]
+    dart: [core, async, collection, math]
+  - id: l10n
+    files: ['lib/l10n/**']
+    allow: [l10n]
+    packages: [flutter, flutter_localizations, intl]
+    dart: [core, async, collection]
+  - id: infrastructure
+    files: ['lib/core/**']
+    allow: [infrastructure, errors, values]
+    packages: ['*']
+    dart: ['*']
+# Cross-feature edges must use lib/features/<target>/<target>.dart.
+# Composition is exempt from business feature cycle edges.
+cross_feature: []
+# Exact source/target/rule only; expiry is an exclusive UTC date.
+exceptions: []

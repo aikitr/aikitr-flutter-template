@@ -1,0 +1,127 @@
+# Copy to .github/workflows/flutter-quality.yaml after adapting the declared
+# SDK, generator policy, entry/config paths and repository XCODE_DEVELOPER_DIR.
+# This example assumes committed generated Dart and standalone tool packages.
+name: Flutter quality
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: flutter-quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+env:
+  FLUTTER_VERSION: '3.47.6'
+  FLUTTER_REVISION: '5fc346839b5d0eef006ed8404392afb4dfae428d'
+  USE_L10N: 'true'
+  USE_BUILD_RUNNER: 'true'
+  CONFIG_DIRECTORY: 'config'
+jobs:
+  quality:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Install the fixed Flutter SDK
+        shell: bash
+        run: |
+          sdk="$RUNNER_TEMP/flutter-sdk"
+          git init "$sdk"
+          git -C "$sdk" remote add origin https://github.com/flutter/flutter.git
+          git -C "$sdk" fetch --depth 1 origin "$FLUTTER_REVISION"
+          git -C "$sdk" checkout --detach FETCH_HEAD
+          printf '%s\n' "$sdk/bin" >> "$GITHUB_PATH"
+      - name: Verify SDK and resolve locked dependencies
+        shell: bash
+        run: |
+          flutter --version --machine > "$RUNNER_TEMP/flutter-version.json"
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          sdk = json.loads((Path(os.environ['RUNNER_TEMP']) / 'flutter-version.json').read_text())
+          assert sdk['frameworkRevision'] == os.environ['FLUTTER_REVISION']
+          assert sdk['frameworkVersion'] == os.environ['FLUTTER_VERSION']
+          if Path('.fvmrc').exists():
+              assert json.loads(Path('.fvmrc').read_text())['flutter'] == os.environ['FLUTTER_VERSION']
+          PY
+          flutter pub get --enforce-lockfile
+          (cd tool/architecture_checks && dart pub get --enforce-lockfile)
+      - name: Generate configured sources
+        shell: bash
+        run: |
+          if [[ "$USE_L10N" == true ]]; then flutter gen-l10n; fi
+          if [[ "$USE_BUILD_RUNNER" == true ]]; then dart run build_runner build; fi
+      - name: Check generated files and formatting
+        shell: bash
+        run: |
+          python3 tool/verify_generated.py --root "$GITHUB_WORKSPACE"
+          sources=()
+          for dir in lib test integration_test tool; do
+            if [[ -d "$dir" ]]; then sources+=("$dir"); fi
+          done
+          dart format --output=none --set-exit-if-changed "${sources[@]}"
+      - name: Check boundaries and the checker itself
+        shell: bash
+        run: |
+          (
+            cd tool/architecture_checks
+            dart analyze --fatal-infos
+            dart test
+            dart run bin/check_boundaries.dart --root "$GITHUB_WORKSPACE" --config "$GITHUB_WORKSPACE/architecture.yaml"
+          )
+          python3 -m unittest discover -s tool -p 'test_verify_generated.py'
+      - name: Analyze and test the app
+        shell: bash
+        run: |
+          flutter analyze --fatal-infos
+          flutter test --coverage
+  ios:
+    needs: quality
+    runs-on: macos-15
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        flavor: [dev, staging, prod]
+    env:
+      # Set to a validated installed Xcode Developer path; absence fails clearly.
+      DEVELOPER_DIR: ${{ vars.XCODE_DEVELOPER_DIR }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Check selected Xcode
+        shell: bash
+        run: |
+          test -n "$DEVELOPER_DIR"
+          test -d "$DEVELOPER_DIR"
+          xcodebuild -version
+      - name: Install the fixed Flutter SDK
+        shell: bash
+        run: |
+          sdk="$RUNNER_TEMP/flutter-sdk"
+          git init "$sdk"
+          git -C "$sdk" remote add origin https://github.com/flutter/flutter.git
+          git -C "$sdk" fetch --depth 1 origin "$FLUTTER_REVISION"
+          git -C "$sdk" checkout --detach FETCH_HEAD
+          printf '%s\n' "$sdk/bin" >> "$GITHUB_PATH"
+      - name: Resolve and generate
+        shell: bash
+        run: |
+          flutter pub get --enforce-lockfile
+          if [[ "$USE_L10N" == true ]]; then flutter gen-l10n; fi
+          if [[ "$USE_BUILD_RUNNER" == true ]]; then dart run build_runner build; fi
+      - name: Build the selected simulator flavor
+        shell: bash
+        env:
+          BUILD_FLAVOR: ${{ matrix.flavor }}
+        run: |
+          entry="lib/main_${BUILD_FLAVOR}.dart"
+          config="$CONFIG_DIRECTORY/$BUILD_FLAVOR.json"
+          test -f "$entry"
+          test -f "$config"
+          flutter build ios --simulator --debug --no-codesign \
+            --flavor "$BUILD_FLAVOR" -t "$entry" --dart-define-from-file "$config"

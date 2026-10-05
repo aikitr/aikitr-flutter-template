@@ -92,7 +92,8 @@ final class _ComponentShowcasePageState extends State<ComponentShowcasePage> {
                   title: l10n.componentsTitle,
                   actions: <Widget>[
                     CupertinoActionSheetAction(
-                      onPressed: () => Navigator.of(context).pop(),
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true).pop(),
                       child: Text(l10n.confirm),
                     ),
                   ],

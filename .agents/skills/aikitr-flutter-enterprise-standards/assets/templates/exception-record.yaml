@@ -1,0 +1,14 @@
+# Form only. Fill real values before adding an exact exception to architecture.yaml.
+rule: layer
+source: lib/features/orders/presentation/order_page.dart
+target: lib/features/orders/data/legacy_order_repository.dart
+owner: orders_team
+reason: temporary migration bridge
+issue: ARCH-123
+approved_by: architecture_owner
+# Exclusive UTC date: exception is invalid starting at this date.
+expires: YYYY-MM-DD
+compensating_controls:
+  - contract and account-isolation tests
+removal_condition: consumer uses OrderRepository contract
+review_evidence: link to the decision and verification

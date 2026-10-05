@@ -1,0 +1,20 @@
+# Metadata form; use the project's typed validator and delivery adapter.
+key: orders_new_checkout
+owner: checkout_team
+type: boolean
+default_value: false
+purpose: controlled rollout of the verified checkout flow
+scope: environment_and_account
+config_version: 1
+compatible:
+  app_versions: declare_supported_range
+  protocol_versions: declare_supported_range
+  schema_versions: declare_supported_range
+expires: YYYY-MM-DD
+offline_policy: compatible_unexpired_last_known_good_or_default
+in_flight_policy: operation_snapshot_and_backend_status_protocol
+rollout:
+  cohort: stable_server_assigned_cohort
+  guardrails: success_rate_error_rate_and_performance
+  stop_condition: declared_threshold_and_minimum_sample
+removal_date: YYYY-MM-DD
